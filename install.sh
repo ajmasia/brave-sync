@@ -34,6 +34,10 @@ chmod +x "$BIN_DIR/brave-backup" "$BIN_DIR/brave-restore"
 mkdir -p "$DESKTOP_DIR"
 cp "$INSTALL_DIR/desktop/"*.desktop "$DESKTOP_DIR/"
 
+# Install main CLI command
+cp "$INSTALL_DIR/cli/brave_sync.sh" "$BIN_DIR/brave-sync"
+chmod +x "$BIN_DIR/brave-sync"
+
 # version
 # Save version info
 cp "$INSTALL_DIR/version" "$INSTALL_DIR/.version"
