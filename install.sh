@@ -47,12 +47,10 @@ fi
 
 # Create launcher scripts
 echo '#!/bin/bash
-source "$HOME/.local/share/brave-sync/scripts/functions.sh"
-bash "$HOME/.local/share/brave-sync/scripts/backup_brave.sh"' >"$BIN_DIR/brave-backup"
+bash "$HOME/.local/share/brave-sync/scripts/sync.sh" backup' >"$BIN_DIR/brave-backup"
 
 echo '#!/bin/bash
-source "$HOME/.local/share/brave-sync/scripts/functions.sh"
-bash "$HOME/.local/share/brave-sync/scripts/restore_brave.sh"' >"$BIN_DIR/brave-restore"
+bash "$HOME/.local/share/brave-sync/scripts/sync.sh" restore' >"$BIN_DIR/brave-restore"
 
 chmod +x "$BIN_DIR/brave-backup" "$BIN_DIR/brave-restore"
 
