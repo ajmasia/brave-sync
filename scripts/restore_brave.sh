@@ -8,7 +8,16 @@ set_brave_command
 
 # Paths
 BRAVE_DIR="$HOME/.config/BraveSoftware/Brave-Browser/Default"
-NEXTCLOUD_DIR="$HOME/Nextcloud/data/brave-sync"
+
+CONFIG_FILE="$HOME/.config/brave-sync/config"
+if [ -f "$CONFIG_FILE" ]; then
+  source "$CONFIG_FILE"
+else
+  echo "❌ Sync configuration file not found: $CONFIG_FILE"
+  exit 1
+fi
+
+NEXTCLOUD_DIR="$SYNC_DIR"
 
 # Check if Brave is running
 if is_brave_running; then

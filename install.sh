@@ -4,6 +4,8 @@ REPO_URL="https://github.com/ajmasia/brave-sync.git"
 INSTALL_DIR="$HOME/.local/share/brave-sync"
 BIN_DIR="$HOME/.local/bin"
 DESKTOP_DIR="$HOME/.local/share/applications"
+CONFIG_DIR="$HOME/.config/brave-sync"
+CONFIG_FILE="$CONFIG_DIR/config"
 
 echo "📦 Installing Brave Sync..."
 
@@ -14,6 +16,21 @@ if [ -d "$INSTALL_DIR/.git" ]; then
 else
   echo "⬇️ Cloning repository..."
   git clone --quiet "$REPO_URL" "$INSTALL_DIR"
+fi
+
+# Ask user for sync destination
+mkdir -p "$CONFIG_DIR"
+if [ -f "$CONFIG_FILE" ]; then
+  echo "📂 Existing sync directory found in config:"
+  grep SYNC_DIR "$CONFIG_FILE"
+else
+  read -rp "📂 Enter the full path to your Brave sync folder (e.g., /home/you/Nextcloud/data/brave-sync): " SYNC_PATH
+  if [ -z "$SYNC_PATH" ]; then
+    echo "❌ Sync path cannot be empty. Install aborted."
+    exit 1
+  fi
+  echo "SYNC_DIR=\"$SYNC_PATH\"" >"$CONFIG_FILE"
+  echo "✅ Sync directory saved to $CONFIG_FILE"
 fi
 
 # Create bin directory
@@ -38,7 +55,6 @@ cp "$INSTALL_DIR/desktop/"*.desktop "$DESKTOP_DIR/"
 cp "$INSTALL_DIR/cli/brave_sync.sh" "$BIN_DIR/brave-sync"
 chmod +x "$BIN_DIR/brave-sync"
 
-# version
 # Save version info
 cp "$INSTALL_DIR/version" "$INSTALL_DIR/.version"
 
