@@ -41,5 +41,6 @@ chmod +x "$BIN_DIR/brave-sync"
 # version
 # Save version info
 cp "$INSTALL_DIR/version" "$INSTALL_DIR/.version"
+
 echo "📦 Installed Brave Sync version $(cat "$INSTALL_DIR/.version")"
 echo "➡️  You can run: brave-backup or brave-restore"
