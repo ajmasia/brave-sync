@@ -6,7 +6,6 @@ source "$(dirname "$0")/functions.sh"
 
 MODE="$1"
 load_sync_config
-check_brave_running
 
 case "$MODE" in
 backup)
