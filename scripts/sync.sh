@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo $(dirname "$0")
+
 source "$(dirname "$0")/../env.sh"
 source "$(dirname "$0")/core.sh"
 source "$(dirname "$0")/functions.sh"
