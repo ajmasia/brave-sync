@@ -1,7 +1,11 @@
 #!/bin/bash
 
 run_backup() {
-  check_brave_running && BRAVE_WAS_RUNNING=1 || BRAVE_WAS_RUNNING=0
+  if check_is_close_brave_is_needed; then
+    BRAVE_WAS_CLOSED=1
+  else
+    BRAVE_WAS_CLOSED=0
+  fi
 
   for ITEM in Bookmarks Extensions "Web Data" Preferences History; do
     if [ -e "$BRAVE_DIR/$ITEM" ]; then
@@ -14,13 +18,17 @@ run_backup() {
 
   echo "🎉 Backup completed."
 
-  if [ "$BRAVE_WAS_RUNNING" -eq 1 ]; then
+  if [ "$BRAVE_WAS_CLOSED" -eq 1 ]; then
     reopen_brave
   fi
 }
 
 run_restore() {
-  check_brave_running && BRAVE_WAS_RUNNING=1 || BRAVE_WAS_RUNNING=0
+  if check_is_close_brave_is_needed; then
+    BRAVE_WAS_CLOSED=1
+  else
+    BRAVE_WAS_CLOSED=0
+  fi
 
   for ITEM in Bookmarks Extensions "Web Data" Preferences History; do
     if [ -e "$NEXTCLOUD_DIR/$ITEM" ]; then
@@ -33,7 +41,7 @@ run_restore() {
 
   echo "🎉 Restore completed."
 
-  if [ "$BRAVE_WAS_RUNNING" -eq 1 ]; then
+  if [ "$BRAVE_WAS_CLOSED" -eq 1 ]; then
     reopen_brave
   fi
 }

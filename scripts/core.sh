@@ -11,6 +11,18 @@ set_brave_command() {
   fi
 }
 
+is_brave_running() {
+  pgrep -x brave-browser >/dev/null 2>&1 || pgrep -x brave >/dev/null 2>&1
+}
+
+close_brave() {
+  echo "🔻 Closing Brave..."
+  pgrep -x brave-browser >/dev/null && pkill -x brave-browser
+  pgrep -x brave >/dev/null && pkill -x brave
+  sleep 2
+  echo "✅ Brave has been closed."
+}
+
 load_sync_config() {
   if [ ! -f "$CONFIG_FILE" ]; then
     echo "❌ Sync configuration not found: $CONFIG_FILE"
@@ -28,16 +40,13 @@ load_sync_config() {
   NEXTCLOUD_DIR="$SYNC_DIR"
 }
 
-check_brave_running() {
-  set_brave_command
-  if pgrep -fa "$BRAVE_CMD" | grep -v "$0" >/dev/null; then
+check_is_close_brave_is_needed() {
+  echo is_brave_running
+  if is_brave_running; then
     read -rp "⚠️ Brave is currently running. Close it to proceed? [y/N] " response
     case "$response" in
     [yY]*)
-      echo "🔻 Closing Brave..."
-      pkill -f "$BRAVE_CMD"
-      sleep 2
-      echo "✅ Brave closed."
+      close_brave
       return 0
       ;;
     *)
