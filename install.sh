@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source "$(dirname "$0")/env.sh"
+REPO_URL="https://github.com/ajmasia/brave-sync.git"
+INSTALL_DIR="$HOME/.local/share/brave-sync"
 
 echo "📦 Installing Brave Sync..."
 
@@ -15,6 +16,8 @@ else
   echo "⬇️ Cloning repository ..."
   git clone --quiet --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
 fi
+
+source "$(dirname "$0")/env.sh"
 
 # Ask user for sync destination
 mkdir -p "$CONFIG_DIR"
