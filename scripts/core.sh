@@ -1,4 +1,16 @@
 #!/bin/bash
+
+set_brave_command() {
+  if command -v brave-browser >/dev/null 2>&1; then
+    BRAVE_CMD="brave-browser"
+  elif command -v brave >/dev/null 2>&1; then
+    BRAVE_CMD="brave"
+  else
+    echo "❌ Brave is not installed or not found in PATH."
+    exit 1
+  fi
+}
+
 load_sync_config() {
   if [ ! -f "$CONFIG_FILE" ]; then
     echo "❌ Sync configuration not found: $CONFIG_FILE"
