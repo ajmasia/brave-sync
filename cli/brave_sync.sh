@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source "$(dirname "$0")/../env.sh"
+CONFIG_DIR="$HOME/.config/brave-sync"
+CONFIG_FILE="$CONFIG_DIR/config"
 
 print_help() {
   echo "📦 Brave Sync CLI"

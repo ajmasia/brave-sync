@@ -8,3 +8,5 @@ CONFIG_FILE="$CONFIG_DIR/config"
 
 DEFAULT_SYNC_PATH="$HOME/Nextcloud/data/brave-sync"
 DESKTOP_DIR="$HOME/.local/share/applications"
+
+INSTALL_DIR="$HOME/.local/share/brave-sync"
