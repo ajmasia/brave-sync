@@ -41,7 +41,6 @@ load_sync_config() {
 }
 
 check_is_close_brave_is_needed() {
-  echo is_brave_running
   if is_brave_running; then
     read -rp "⚠️ Brave is currently running. Close it to proceed? [y/N] " response
     case "$response" in
