@@ -5,6 +5,7 @@ source "$(dirname "$0")/functions.sh"
 
 # Set the Brave command (brave or brave-browser)
 set_brave_command
+load_sync_config
 
 # Paths
 BRAVE_DIR="$HOME/.config/BraveSoftware/Brave-Browser/Default"

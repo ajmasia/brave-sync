@@ -30,6 +30,9 @@ version)
     echo "Brave Sync version: unknown"
   fi
   ;;
+config)
+  bash "$HOME/.local/share/brave-sync/scripts/configure_sync_path.sh"
+  ;;
 help | -h | --help | "")
   print_help
   ;;

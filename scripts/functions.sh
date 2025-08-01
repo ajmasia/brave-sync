@@ -25,3 +25,22 @@ close_brave() {
   sleep 2
   echo "✅ Brave has been closed."
 }
+
+load_sync_config() {
+  CONFIG_FILE="$HOME/.config/brave-sync/config"
+  if [ ! -f "$CONFIG_FILE" ]; then
+    echo "❌ Sync configuration not found: $CONFIG_FILE"
+    echo "💡 Run 'brave-sync config' to set your sync folder."
+    exit 1
+  fi
+
+  source "$CONFIG_FILE"
+
+  if [ -z "$SYNC_DIR" ]; then
+    echo "❌ SYNC_DIR is empty in config file."
+    echo "💡 Run 'brave-sync config' to fix it."
+    exit 1
+  fi
+
+  NEXTCLOUD_DIR="$SYNC_DIR"
+}

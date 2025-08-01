@@ -14,6 +14,7 @@ esac
 INSTALL_DIR="$HOME/.local/share/brave-sync"
 BIN_DIR="$HOME/.local/bin"
 DESKTOP_DIR="$HOME/.local/share/applications"
+CONFIG_DIR="$HOME/.config/brave-sync"
 
 # Remove desktop launchers
 echo "🗑️ Removing .desktop launchers..."
@@ -28,5 +29,9 @@ rm -f "$BIN_DIR/brave-restore"
 # Remove installed folder
 echo "🗑️ Removing installation directory..."
 rm -rf "$INSTALL_DIR"
+
+# Remove installed folder
+echo "🗑️ Removing config directory..."
+rm -rf "$CONFIG_DIR"
 
 echo "✅ Brave Sync has been removed."
