@@ -37,7 +37,7 @@ load_sync_config() {
     exit 1
   fi
 
-  NEXTCLOUD_DIR="$SYNC_DIR"
+  CLOUD_DIR="$SYNC_DIR"
 }
 
 check_is_close_brave_is_needed() {

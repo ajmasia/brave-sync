@@ -3,6 +3,10 @@
 REPO_URL="https://github.com/ajmasia/brave-sync.git"
 INSTALL_DIR="$HOME/.local/share/brave-sync"
 
+ICON_SOURCE="$INSTALL_DIR/icons/brave-sync.png"
+ICON_TARGET_DIR="$HOME/.local/share/icons/hicolor/48x48/apps"
+ICON_TARGET="$ICON_TARGET_DIR/brave-sync.png"
+
 echo "📦 Installing Brave Sync..."
 
 BRANCH="${BRANCH:-main}"
