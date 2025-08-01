@@ -17,7 +17,7 @@ else
   git clone --quiet --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
 fi
 
-source "$(dirname "$0")/env.sh"
+source "$INSTALL_DIR/scripts/env.sh"
 
 # Ask user for sync destination
 mkdir -p "$CONFIG_DIR"

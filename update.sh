@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source "$(dirname "$0")/env.sh"
+INSTALL_DIR="$HOME/.local/share/brave-sync"
+VERSION_FILE_LOCAL="$INSTALL_DIR/.version"
+REPO_VERSION_FILE="$INSTALL_DIR/version"
 
 echo "🔄 Checking for Brave Sync updates..."
 
