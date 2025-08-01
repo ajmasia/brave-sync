@@ -1,8 +1,6 @@
 #!/bin/bash
 
-INSTALL_DIR="$HOME/.local/share/brave-sync"
-VERSION_FILE_LOCAL="$INSTALL_DIR/.version"
-REPO_VERSION_FILE="$INSTALL_DIR/version"
+source "$(dirname "$0")/env.sh"
 
 # Detect current branch
 BRANCH=$(git -C "$INSTALL_DIR" rev-parse --abbrev-ref HEAD)

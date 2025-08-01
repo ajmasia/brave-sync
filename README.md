@@ -33,3 +33,4 @@ wget -qO- https://raw.githubusercontent.com/YOUR-USERNAME/brave-sync/main/instal
 ## TODO
 
 - [ ] Divide variables for install process and scriptable process
+- [ ] Add uninstall and update as cli commands

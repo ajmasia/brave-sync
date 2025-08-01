@@ -39,10 +39,10 @@ config)
   ${EDITOR:-nano} "$CONFIG_FILE"
   ;;
 update)
-  bash "$HOME/.local/share/brave-sync/update.sh"
+  bash "$HOME/.local/share/brave-sync/scripts/update.sh"
   ;;
 uninstall)
-  bash "$HOME/.local/share/brave-sync/uninstall.sh"
+  bash "$HOME/.local/share/brave-sync/scripts/uninstall.sh"
   ;;
 version)
   VERSION_FILE="$HOME/.local/share/brave-sync/.version"

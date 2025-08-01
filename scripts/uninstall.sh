@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$(dirname "$0")/env.sh"
+
 echo "⚠️  This will uninstall Brave Sync for the current user."
 read -rp "Are you sure? [y/N] " confirm
 case "$confirm" in
@@ -9,12 +11,6 @@ case "$confirm" in
   exit 0
   ;;
 esac
-
-# Paths
-INSTALL_DIR="$HOME/.local/share/brave-sync"
-BIN_DIR="$HOME/.local/bin"
-DESKTOP_DIR="$HOME/.local/share/applications"
-CONFIG_DIR="$HOME/.config/brave-sync"
 
 # Remove desktop launchers
 echo "🗑️ Removing .desktop launchers..."
