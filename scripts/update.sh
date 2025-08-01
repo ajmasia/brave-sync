@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(dirname "$0")/env.sh"
+source "$HOME/.local/share/brave-sync/scripts/env.sh"
 
 # Detect current branch
 BRANCH=$(git -C "$INSTALL_DIR" rev-parse --abbrev-ref HEAD)

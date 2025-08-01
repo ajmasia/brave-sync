@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source "$(dirname "$0")/env.sh"
-source "$(dirname "$0")/core.sh"
-source "$(dirname "$0")/functions.sh"
+source "$HOME/.local/share/brave-sync/scripts/env.sh"
+source "$HOME/.local/share/brave-sync/scripts//core.sh"
+source "$HOME/.local/share/brave-sync/scripts/functions.sh"
 
 set_brave_command
 

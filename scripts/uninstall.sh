@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(dirname "$0")/env.sh"
+source "$HOME/.local/share/brave-sync/scripts/env.sh"
 
 echo "⚠️  This will uninstall Brave Sync for the current user."
 read -rp "Are you sure? [y/N] " confirm
