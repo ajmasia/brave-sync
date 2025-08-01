@@ -2,6 +2,7 @@
 
 INSTALL_DIR="$HOME/.local/share/brave-sync"
 VERSION_FILE_LOCAL="$INSTALL_DIR/.version"
+REPO_VERSION_FILE="$INSTALL_DIR/version"
 
 echo "🔄 Checking for Brave Sync updates..."
 
@@ -15,7 +16,7 @@ fi
 if [ ! -d "$INSTALL_DIR/.git" ]; then
   echo "⚠️  Cannot auto-update: not a Git installation."
   echo "ℹ️  Reinstall using Git:"
-  echo "   curl -sL https://raw.githubusercontent.com/YOUR-USERNAME/brave-sync/main/install.sh | bash"
+  echo "   curl -sL https://raw.githubusercontent.com/ajamsia/brave-sync/main/install.sh | bash"
   exit 1
 fi
 
@@ -29,14 +30,14 @@ else
   LOCAL_VERSION="unknown"
 fi
 
-# Get remote version from GitHub (without switching branches)
-if git -C "$INSTALL_DIR" show origin/main:VERSION >/dev/null 2>&1; then
-  REMOTE_VERSION=$(git -C "$INSTALL_DIR" show origin/main:VERSION)
+# Get remote version from GitHub (lowercase file)
+if git -C "$INSTALL_DIR" show origin/main:version >/dev/null 2>&1; then
+  REMOTE_VERSION=$(git -C "$INSTALL_DIR" show origin/main:version)
 else
   REMOTE_VERSION="unknown"
 fi
 
-# Compare
+# Compare versions
 if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
   echo "✅ Brave Sync is already up to date (version $LOCAL_VERSION)"
   exit 0
@@ -49,5 +50,5 @@ git -C "$INSTALL_DIR" pull --quiet
 bash "$INSTALL_DIR/install.sh"
 
 # Update version file
-echo "$REMOTE_VERSION" >"$VERSION_FILE_LOCAL"
+cp "$REPO_VERSION_FILE" "$VERSION_FILE_LOCAL"
 echo "✅ Updated to Brave Sync version $REMOTE_VERSION"
