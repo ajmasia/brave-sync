@@ -4,13 +4,7 @@ source "$(dirname "$0")/env.sh"
 
 echo "📦 Installing Brave Sync..."
 
-# Attempt to detect branch from $0 if running via raw.githubusercontent
-if [[ "$0" =~ ^https://raw.githubusercontent.com/.+?/brave-sync/([^/]+)/install\.sh$ ]]; then
-  BRANCH="${BASH_REMATCH[1]}"
-else
-  BRANCH="main" # fallback if unknown
-fi
-
+BRANCH="${BRANCH:-main}"
 echo "📄 Using branch: $BRANCH"
 
 # Clone or update repo
