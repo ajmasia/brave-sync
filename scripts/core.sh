@@ -29,7 +29,7 @@ load_sync_config() {
 }
 
 check_brave_running() {
-  BRAVE_CMD=$(command -v brave-browser || command -v brave)
+  set_brave_command
   if pgrep -fa "$BRAVE_CMD" | grep -v "$0" >/dev/null; then
     read -rp "⚠️ Brave is currently running. Close it to proceed? [y/N] " response
     case "$response" in
@@ -54,7 +54,7 @@ reopen_brave() {
   case "$reopen" in
   [yY]*)
     echo "🚀 Launching Brave..."
-    BRAVE_CMD=$(command -v brave-browser || command -v brave)
+    set_brave_command
     nohup "$BRAVE_CMD" --restore-last-session >/dev/null 2>&1 &
     ;;
   *)
