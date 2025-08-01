@@ -29,7 +29,6 @@ if [ -f "$CONFIG_FILE" ]; then
   echo "📂 Existing sync directory found in config:"
   grep SYNC_DIR "$CONFIG_FILE"
 else
-  DEFAULT_SYNC_PATH="$HOME/Nextcloud/data/brave-sync"
   while true; do
     read -rp "📂 Enter the full path to your Brave sync folder [$DEFAULT_SYNC_PATH]: " SYNC_PATH
     SYNC_PATH="${SYNC_PATH:-$DEFAULT_SYNC_PATH}"
