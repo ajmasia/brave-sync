@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Restore Brave
+Comment=Restore Brave data from Nextcloud
+Exec=brave-restore
+Icon=__ICON_RESTORE__
+Terminal=true
+Type=Application
+Categories=Utility;
+

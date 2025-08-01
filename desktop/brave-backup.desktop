@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Backup Brave
+Comment=Backup Brave data to Nextcloud
+Exec=brave-backup
+Icon=__ICON_BACKUP__
+Terminal=true
+Type=Application
+Categories=Utility;
+
