@@ -4,6 +4,10 @@ INSTALL_DIR="$HOME/.local/share/brave-sync"
 VERSION_FILE_LOCAL="$INSTALL_DIR/.version"
 REPO_VERSION_FILE="$INSTALL_DIR/version"
 
+# Detect current branch
+BRANCH=$(git -C "$INSTALL_DIR" rev-parse --abbrev-ref HEAD)
+
+echo "📄 Tracking branch: $BRANCH"
 echo "🔄 Checking for Brave Sync updates..."
 
 # Check if installed
@@ -30,9 +34,9 @@ else
   LOCAL_VERSION="unknown"
 fi
 
-# Get remote version from GitHub (lowercase file)
-if git -C "$INSTALL_DIR" show origin/main:version >/dev/null 2>&1; then
-  REMOTE_VERSION=$(git -C "$INSTALL_DIR" show origin/main:version)
+# Get remote version for that branch
+if git -C "$INSTALL_DIR" show origin/$BRANCH:version >/dev/null 2>&1; then
+  REMOTE_VERSION=$(git -C "$INSTALL_DIR" show origin/$BRANCH:version)
 else
   REMOTE_VERSION="unknown"
 fi

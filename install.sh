@@ -6,7 +6,6 @@ INSTALL_DIR="$HOME/.local/share/brave-sync"
 echo "📦 Installing Brave Sync..."
 
 BRANCH="${BRANCH:-main}"
-echo "📄 Using branch: $BRANCH"
 
 # Clone or update repo
 if [ -d "$INSTALL_DIR/.git" ]; then
