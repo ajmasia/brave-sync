@@ -1,12 +1,6 @@
 #!/bin/bash
 
-REPO_URL="https://github.com/ajmasia/brave-sync.git"
-INSTALL_DIR="$HOME/.local/share/brave-sync"
-BIN_DIR="$HOME/.local/bin"
-DESKTOP_DIR="$HOME/.local/share/applications"
-CONFIG_DIR="$HOME/.config/brave-sync"
-CONFIG_FILE="$CONFIG_DIR/config"
-DEFAULT_SYNC_PATH="$HOME/Nextcloud/data/brave-sync"
+source "$(dirname "$0")/env.sh"
 
 echo "📦 Installing Brave Sync..."
 
@@ -55,6 +49,15 @@ source "$HOME/.local/share/brave-sync/scripts/functions.sh"
 bash "$HOME/.local/share/brave-sync/scripts/restore_brave.sh"' >"$BIN_DIR/brave-restore"
 
 chmod +x "$BIN_DIR/brave-backup" "$BIN_DIR/brave-restore"
+
+# Install icons
+mkdir -p "$ICON_TARGET_DIR"
+cp "$ICON_SOURCE" "$ICON_TARGET"
+
+# Update icon cache if available
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" >/dev/null 2>&1
+fi
 
 # Install .desktop launchers
 mkdir -p "$DESKTOP_DIR"
