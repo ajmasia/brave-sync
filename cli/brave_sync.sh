@@ -8,7 +8,6 @@ print_help() {
   echo "Commands:"
   echo "  backup       Backup Brave data to Nextcloud"
   echo "  restore      Restore Brave data from Nextcloud"
-  echo "  install      Install or reinstall Brave Sync"
   echo "  update       Update Brave Sync (from Git)"
   echo "  uninstall    Remove Brave Sync"
   echo "  version      Show installed version"
@@ -22,7 +21,6 @@ print_help() {
 case "$1" in
 backup) brave-backup ;;
 restore) brave-restore ;;
-install) bash "$HOME/.local/share/brave-sync/install.sh" ;;
 update) bash "$HOME/.local/share/brave-sync/update.sh" ;;
 uninstall) bash "$HOME/.local/share/brave-sync/uninstall.sh" ;;
 version)
