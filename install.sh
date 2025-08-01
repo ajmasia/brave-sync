@@ -6,6 +6,7 @@ BIN_DIR="$HOME/.local/bin"
 DESKTOP_DIR="$HOME/.local/share/applications"
 CONFIG_DIR="$HOME/.config/brave-sync"
 CONFIG_FILE="$CONFIG_DIR/config"
+DEFAULT_SYNC_PATH="$HOME/Nextcloud/data/brave-sync"
 
 echo "📦 Installing Brave Sync..."
 
@@ -20,21 +21,28 @@ fi
 
 # Ask user for sync destination
 mkdir -p "$CONFIG_DIR"
+
+# Create bin directory
+mkdir -p "$BIN_DIR"
+
 if [ -f "$CONFIG_FILE" ]; then
   echo "📂 Existing sync directory found in config:"
   grep SYNC_DIR "$CONFIG_FILE"
 else
-  read -rp "📂 Enter the full path to your Brave sync folder (e.g., /home/you/Nextcloud/data/brave-sync): " SYNC_PATH
-  if [ -z "$SYNC_PATH" ]; then
-    echo "❌ Sync path cannot be empty. Install aborted."
-    exit 1
-  fi
-  echo "SYNC_DIR=\"$SYNC_PATH\"" >"$CONFIG_FILE"
-  echo "✅ Sync directory saved to $CONFIG_FILE"
-fi
+  DEFAULT_SYNC_PATH="$HOME/Nextcloud/data/brave-sync"
+  while true; do
+    read -rp "📂 Enter the full path to your Brave sync folder [$DEFAULT_SYNC_PATH]: " SYNC_PATH
+    SYNC_PATH="${SYNC_PATH:-$DEFAULT_SYNC_PATH}"
 
-# Create bin directory
-mkdir -p "$BIN_DIR"
+    if [[ "$SYNC_PATH" = /* ]]; then
+      echo "SYNC_DIR=\"$SYNC_PATH\"" >"$CONFIG_FILE"
+      echo "✅ Sync directory saved to $CONFIG_FILE"
+      break
+    else
+      echo "❌ Please enter an absolute path (must start with '/')."
+    fi
+  done
+fi
 
 # Create launcher scripts
 echo '#!/bin/bash
