@@ -11,12 +11,14 @@ else
   BRANCH="main" # fallback if unknown
 fi
 
+echo "📄 Using branch: $BRANCH"
+
 # Clone or update repo
 if [ -d "$INSTALL_DIR/.git" ]; then
   echo "🔄 Updating existing installation..."
   git -C "$INSTALL_DIR" pull --quiet
 else
-  echo "⬇️ Cloning repository using branh: $BRANCH ..."
+  echo "⬇️ Cloning repository ..."
   git clone --quiet --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
 fi
 
