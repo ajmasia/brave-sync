@@ -16,7 +16,7 @@ if [ -d "$INSTALL_DIR/.git" ]; then
   echo "🔄 Updating existing installation..."
   git -C "$INSTALL_DIR" pull --quiet
 else
-  echo "⬇️ Cloning repository..."
+  echo "⬇️ Cloning repository using branh: $BRANCH ..."
   git clone --quiet --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
 fi
 
