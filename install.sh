@@ -22,25 +22,27 @@ fi
 # Ask user for sync destination
 mkdir -p "$CONFIG_DIR"
 
-# Create bin directory
-mkdir -p "$BIN_DIR"
-
 if [ -f "$CONFIG_FILE" ]; then
   echo "📂 Existing sync directory found in config:"
   grep SYNC_DIR "$CONFIG_FILE"
 else
-  while true; do
-    read -rp "📂 Enter the full path to your Brave sync folder [$DEFAULT_SYNC_PATH]: " SYNC_PATH
-    SYNC_PATH="${SYNC_PATH:-$DEFAULT_SYNC_PATH}"
+  read -rp "📂 Enter the full path to your Brave sync folder [$DEFAULT_SYNC_PATH]: " SYNC_PATH
+  SYNC_PATH="${SYNC_PATH:-$DEFAULT_SYNC_PATH}"
+  EXPANDED_PATH=$(eval echo "$SYNC_PATH")
 
-    if [[ "$SYNC_PATH" = /* ]]; then
-      echo "SYNC_DIR=\"$SYNC_PATH\"" >"$CONFIG_FILE"
-      echo "✅ Sync directory saved to $CONFIG_FILE"
-      break
-    else
-      echo "❌ Please enter an absolute path (must start with '/')."
-    fi
-  done
+  if [[ -z "$EXPANDED_PATH" ]]; then
+    echo "❌ Path cannot be empty. Install aborted."
+    exit 1
+  elif [[ "$EXPANDED_PATH" != /* ]]; then
+    echo "❌ Path must be absolute (start with '/'). Install aborted."
+    exit 1
+  elif [ ! -d "$EXPANDED_PATH" ]; then
+    echo "❌ Directory does not exist: $EXPANDED_PATH. Install aborted."
+    exit 1
+  else
+    echo "SYNC_DIR=\"$EXPANDED_PATH\"" >"$CONFIG_FILE"
+    echo "✅ Sync directory saved to $CONFIG_FILE"
+  fi
 fi
 
 # Create launcher scripts
