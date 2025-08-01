@@ -25,5 +25,7 @@ A simple, private and scriptable way to **backup and restore Brave browser data*
 ### 📁 Option 1: Git-based
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/ajmasia/brave-sync/main/install.sh)
-
+curl -sL https://raw.githubusercontent.com/ajmasia/brave-sync/main/install.sh | bash
+# or
+wget -qO- https://raw.githubusercontent.com/YOUR-USERNAME/brave-sync/main/install.sh | bash
+```
