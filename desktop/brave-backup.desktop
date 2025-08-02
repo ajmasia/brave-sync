@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Backup Brave
-Comment=Backup Brave data to Nextcloud
-Exec=brave-backup
-Icon=__ICON_BACKUP__
-Terminal=true
 Type=Application
+Name=Brave Sync Backup
+Comment=Backup Brave browser data to your sync folder
+Exec=brave-sync backup
+Icon=brave-sync
+Terminal=true
 Categories=Utility;
 
