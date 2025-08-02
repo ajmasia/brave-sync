@@ -1,55 +1,28 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-source "$HOME/.local/share/brave-sync/scripts/env.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
-print_help() {
-  echo "📦 Brave Sync CLI"
-  echo ""
-  echo "Usage: brave-sync <command>"
-  echo ""
-  echo "Commands:"
-  echo "  backup     - Backup Brave data to sync folder"
-  echo "  restore    - Restore Brave data from sync folder"
-  echo "  update     - Update Brave Sync from GitHub"
-  echo "  config     - Edit config"
-  echo "  uninstall  - Uninstall Brave Sync"
-  echo "  version    - Show installed version"
-  echo "  help       - Show this help message"
-  echo ""
-  echo "Examples:"
-  echo "  brave-sync backup"
-  echo "  brave-sync config"
-}
+source "$REPO_ROOT/scripts/help.sh"
 
 case "$1" in
 backup)
-  bash "$HOME/.local/share/brave-sync/scripts/sync.sh" backup
+  bash "$REPO_ROOT/scripts/sync.sh" backup
   ;;
 restore)
-  bash "$HOME/.local/share/brave-sync/scripts/sync.sh" restore
+  bash "$REPO_ROOT/scripts/sync.sh" restore
   ;;
 config)
-  if [ ! -f "$CONFIG_FILE" ]; then
-    echo "❌ Config file not found: $CONFIG_FILE"
-    echo "💡 Run 'brave-sync install' to set it up."
-    exit 1
-  fi
-
-  ${EDITOR:-nano} "$CONFIG_FILE"
+  bash "$REPO_ROOT/scripts/config.sh"
   ;;
 update)
-  bash "$HOME/.local/share/brave-sync/scripts/update.sh"
+  bash "$REPO_ROOT/scripts/update.sh"
   ;;
 uninstall)
-  bash "$HOME/.local/share/brave-sync/scripts/uninstall.sh"
+  bash "$REPO_ROOT/scripts/uninstall.sh"
   ;;
 version)
-  VERSION_FILE="$HOME/.local/share/brave-sync/.version"
-  if [ -f "$VERSION_FILE" ]; then
-    echo "Brave Sync version: $(cat "$VERSION_FILE")"
-  else
-    echo "Brave Sync version: unknown"
-  fi
+  bash "$REPO_ROOT/scripts/version.sh"
   ;;
 help | -h | --help | "")
   print_help

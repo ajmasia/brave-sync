@@ -1,8 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-source "$HOME/.local/share/brave-sync/scripts/env.sh"
-source "$HOME/.local/share/brave-sync/scripts//core.sh"
-source "$HOME/.local/share/brave-sync/scripts/functions.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$SCRIPT_DIR/.."
+
+source "$REPO_ROOT/env.sh"
+source "$REPO_ROOT/functions.sh"
+source "$REPO_ROOT/core.sh"
 
 set_brave_command
 
