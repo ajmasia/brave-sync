@@ -1,6 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-source "$HOME/.local/share/brave-sync/scripts/env.sh"
+# Fallback to install path if not in DEV_MODE
+if [ "${DEV_MODE:-false}" = true ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  ROOT_DIR="$HOME/.local/share/brave-sync"
+fi
+
+source "$ROOT_DIR/bootstrap.sh"
+
+include_script "scripts/env.sh"
 
 echo "⚠️  This will uninstall Brave Sync for the current user."
 read -rp "Are you sure? [y/N] " confirm
@@ -21,6 +31,7 @@ rm -f "$DESKTOP_DIR/brave-restore.desktop"
 echo "🗑️ Removing executable wrappers..."
 rm -f "$BIN_DIR/brave-backup"
 rm -f "$BIN_DIR/brave-restore"
+rm -f "$BIN_DIR/brave-sync"
 
 # Remove installed folder
 echo "🗑️ Removing installation directory..."

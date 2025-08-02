@@ -1,28 +1,40 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+# Fallback to install path if not in DEV_MODE
+if [ "${DEV_MODE:-false}" = true ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  ROOT_DIR="$HOME/.local/share/brave-sync"
+fi
 
-source "$REPO_ROOT/scripts/help.sh"
+source "$ROOT_DIR/bootstrap.sh"
+
+if [ "${DEV_MODE:-false}" = true ]; then
+  echo "⚙️  Running in DEVELOPMENT mode"
+fi
+
+include_script "scripts/env.sh"
+include_script "scripts/help.sh"
 
 case "$1" in
 backup)
-  bash "$REPO_ROOT/scripts/sync.sh" backup
+  bash "$ROOT_DIR/scripts/sync.sh" backup
   ;;
 restore)
-  bash "$REPO_ROOT/scripts/sync.sh" restore
+  bash "$ROOT_DIR/scripts/sync.sh" restore
   ;;
 config)
-  bash "$REPO_ROOT/scripts/config.sh"
+  bash "$ROOT_DIR/scripts/config.sh"
   ;;
 update)
-  bash "$REPO_ROOT/scripts/update.sh"
+  bash "$ROOT_DIR/scripts/update.sh"
   ;;
 uninstall)
-  bash "$REPO_ROOT/scripts/uninstall.sh"
+  bash "$ROOT_DIR/scripts/uninstall.sh"
   ;;
 version)
-  bash "$REPO_ROOT/scripts/version.sh"
+  bash "$ROOT_DIR/scripts/version.sh"
   ;;
 help | -h | --help | "")
   print_help

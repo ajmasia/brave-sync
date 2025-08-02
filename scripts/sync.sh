@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$SCRIPT_DIR/.."
+# Fallback to install path if not in DEV_MODE
+if [ "${DEV_MODE:-false}" = true ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  ROOT_DIR="$HOME/.local/share/brave-sync"
+fi
 
-source "$REPO_ROOT/env.sh"
-source "$REPO_ROOT/functions.sh"
-source "$REPO_ROOT/core.sh"
+source "$ROOT_DIR/bootstrap.sh"
+
+include_script "scripts/env.sh"
+include_script "scripts/core.sh"
+include_script "scripts/functions.sh"
 
 set_brave_command
 
