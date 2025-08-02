@@ -1,6 +1,7 @@
 #!/bin/bash
 
 run_backup() {
+  echo -e "Starting Brave Sync backup...\n"
   if check_is_close_brave_is_needed; then
     BRAVE_WAS_CLOSED=1
   else
@@ -24,6 +25,7 @@ run_backup() {
 }
 
 run_restore() {
+  echo -e "Starting Brave Sync restore...\n"
   if check_is_close_brave_is_needed; then
     BRAVE_WAS_CLOSED=1
   else
