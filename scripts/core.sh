@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 set_brave_command() {
   if command -v brave-browser >/dev/null 2>&1; then

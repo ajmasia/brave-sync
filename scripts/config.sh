@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+# Fallback to install path if not in DEV_MODE
+if [ "${DEV_MODE:-false}" = true ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  ROOT_DIR="$HOME/.local/share/brave-sync"
+fi
 
-source "$REPO_ROOT/env.sh"
+source "$ROOT_DIR/bootstrap.sh"
+
+include_script "scripts/env.sh"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "❌ Config file not found: $CONFIG_FILE"
