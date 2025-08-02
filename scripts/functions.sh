@@ -22,6 +22,7 @@ run_backup() {
   if [ "$BRAVE_WAS_CLOSED" -eq 1 ]; then
     reopen_brave
   fi
+  command -v notify-send >/dev/null && notify-send "Brave Sync" "Backup completed successfully."
 }
 
 run_restore() {
@@ -46,4 +47,5 @@ run_restore() {
   if [ "$BRAVE_WAS_CLOSED" -eq 1 ]; then
     reopen_brave
   fi
+  command -v notify-send >/dev/null && notify-send "Brave Sync" "Restore completed successfully."
 }
