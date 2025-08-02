@@ -16,6 +16,7 @@ fi
 
 include_script "scripts/env.sh"
 include_script "scripts/help.sh"
+include_script "scripts/check_update.sh"
 
 case "$1" in
 backup)
