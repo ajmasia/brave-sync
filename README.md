@@ -29,3 +29,8 @@ curl -sL https://raw.githubusercontent.com/ajmasia/brave-sync/main/install.sh | 
 # or
 wget -qO- https://raw.githubusercontent.com/YOUR-USERNAME/brave-sync/main/install.sh | bash
 ```
+
+## TODO
+
+- [x] Divide variables for install process and scriptable process
+- [x] Add uninstall and update as cli commands

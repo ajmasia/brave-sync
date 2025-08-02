@@ -1,12 +1,20 @@
 #!/bin/bash
 
-REPO_URL="https://github.com/ajmasia/brave-sync.git"
-INSTALL_DIR="$HOME/.local/share/brave-sync"
 BIN_DIR="$HOME/.local/bin"
-DESKTOP_DIR="$HOME/.local/share/applications"
+INSTALL_DIR="$HOME/.local/share/brave-sync"
+REPO_URL="https://github.com/ajmasia/brave-sync.git"
+
+ICON_SOURCE="$INSTALL_DIR/icons/brave-sync.png"
+ICON_TARGET_DIR="$HOME/.local/share/icons/hicolor/48x48/apps"
+ICON_TARGET="$ICON_TARGET_DIR/brave-sync.png"
+
 CONFIG_DIR="$HOME/.config/brave-sync"
 CONFIG_FILE="$CONFIG_DIR/config"
+
+BRANCH="${BRANCH:-main}"
+
 DEFAULT_SYNC_PATH="$HOME/Nextcloud/data/brave-sync"
+DESKTOP_DIR="$HOME/.local/share/applications"
 
 echo "📦 Installing Brave Sync..."
 
@@ -15,8 +23,8 @@ if [ -d "$INSTALL_DIR/.git" ]; then
   echo "🔄 Updating existing installation..."
   git -C "$INSTALL_DIR" pull --quiet
 else
-  echo "⬇️ Cloning repository..."
-  git clone --quiet "$REPO_URL" "$INSTALL_DIR"
+  echo "⬇️ Cloning repository ..."
+  git clone --quiet --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
 fi
 
 # Ask user for sync destination
@@ -47,14 +55,21 @@ fi
 
 # Create launcher scripts
 echo '#!/bin/bash
-source "$HOME/.local/share/brave-sync/scripts/functions.sh"
-bash "$HOME/.local/share/brave-sync/scripts/backup_brave.sh"' >"$BIN_DIR/brave-backup"
+bash "$HOME/.local/share/brave-sync/scripts/sync.sh" backup' >"$BIN_DIR/brave-backup"
 
 echo '#!/bin/bash
-source "$HOME/.local/share/brave-sync/scripts/functions.sh"
-bash "$HOME/.local/share/brave-sync/scripts/restore_brave.sh"' >"$BIN_DIR/brave-restore"
+bash "$HOME/.local/share/brave-sync/scripts/sync.sh" restore' >"$BIN_DIR/brave-restore"
 
 chmod +x "$BIN_DIR/brave-backup" "$BIN_DIR/brave-restore"
+
+# Install icons
+mkdir -p "$ICON_TARGET_DIR"
+cp "$ICON_SOURCE" "$ICON_TARGET"
+
+# Update icon cache if available
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" >/dev/null 2>&1
+fi
 
 # Install .desktop launchers
 mkdir -p "$DESKTOP_DIR"

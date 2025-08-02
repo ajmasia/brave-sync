@@ -1,37 +1,40 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-print_help() {
-  echo "📦 Brave Sync CLI"
-  echo ""
-  echo "Usage: brave-sync <command>"
-  echo ""
-  echo "Commands:"
-  echo "  backup       Backup Brave data to Nextcloud"
-  echo "  restore      Restore Brave data from Nextcloud"
-  echo "  update       Update Brave Sync (from Git)"
-  echo "  uninstall    Remove Brave Sync"
-  echo "  version      Show installed version"
-  echo "  help         Show this help message"
-  echo ""
-  echo "Examples:"
-  echo "  brave-sync backup"
-  echo "  brave-sync update"
-}
+# Fallback to install path if not in DEV_MODE
+if [ "${DEV_MODE:-false}" = true ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  ROOT_DIR="$HOME/.local/share/brave-sync"
+fi
+
+source "$ROOT_DIR/bootstrap.sh"
+
+if [ "${DEV_MODE:-false}" = true ]; then
+  echo "⚙️  Running in DEVELOPMENT mode"
+fi
+
+include_script "scripts/env.sh"
+include_script "scripts/help.sh"
 
 case "$1" in
-backup) brave-backup ;;
-restore) brave-restore ;;
-update) bash "$HOME/.local/share/brave-sync/update.sh" ;;
-uninstall) bash "$HOME/.local/share/brave-sync/uninstall.sh" ;;
-version)
-  if [ -f "$HOME/.local/share/brave-sync/.version" ]; then
-    echo "Brave Sync version: $(cat "$HOME/.local/share/brave-sync/.version")"
-  else
-    echo "Brave Sync version: unknown"
-  fi
+backup)
+  bash "$ROOT_DIR/scripts/sync.sh" backup
+  ;;
+restore)
+  bash "$ROOT_DIR/scripts/sync.sh" restore
   ;;
 config)
-  bash "$HOME/.local/share/brave-sync/scripts/configure_sync_path.sh"
+  bash "$ROOT_DIR/scripts/config.sh"
+  ;;
+update)
+  bash "$ROOT_DIR/scripts/update.sh"
+  ;;
+uninstall)
+  bash "$ROOT_DIR/scripts/uninstall.sh"
+  ;;
+version)
+  bash "$ROOT_DIR/scripts/version.sh"
   ;;
 help | -h | --help | "")
   print_help
