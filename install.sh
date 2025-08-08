@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 BIN_DIR="$HOME/.local/bin"
 INSTALL_DIR="$HOME/.local/share/brave-sync"
