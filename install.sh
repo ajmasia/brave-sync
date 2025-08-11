@@ -1,86 +1,230 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-BIN_DIR="$HOME/.local/bin"
-INSTALL_DIR="$HOME/.local/share/brave-sync"
-REPO_URL="https://github.com/ajmasia/brave-sync.git"
+# -----------------------------------------------------------------------------
+# brave-sync installer (works from GitHub via curl | bash OR from local repo)
+# - Prefers 'uv tool install' (isolated user tool). Fallback to 'pipx install'.
+# - If running inside a local repo (pyproject.toml present), installs from '.'.
+# - If not, installs directly from GitHub (branch/tag via --ref, default 'main').
+# - Preflight checks for runtime deps: rsync (and procps on Linux).
+#
+# Options:
+#   --ref <branch|tag>   Git ref when installing from GitHub (default: main)
+#   --force              Reinstall/overwrite (tool mode)
+#   --editable           Dev install into .venv with 'uv pip install -e .'
+#   --check              Only run dependency checks and exit
+# -----------------------------------------------------------------------------
 
-ICON_SOURCE="$INSTALL_DIR/icons/brave-sync.png"
-ICON_TARGET_DIR="$HOME/.local/share/icons/hicolor/48x48/apps"
-ICON_TARGET="$ICON_TARGET_DIR/brave-sync.png"
+REPO="ajmasia/brave-sync"
+REF="main"
+FORCE_FLAG=""
+EDITABLE=0
+CHECK_ONLY=0
 
-CONFIG_DIR="$HOME/.config/brave-sync"
-CONFIG_FILE="$CONFIG_DIR/config"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  --ref)
+    REF="${2:-main}"
+    shift 2
+    ;;
+  --force)
+    FORCE_FLAG="--force"
+    shift
+    ;;
+  --editable)
+    EDITABLE=1
+    shift
+    ;;
+  --check)
+    CHECK_ONLY=1
+    shift
+    ;;
+  -h | --help)
+    cat <<EOF
+Usage: $(basename "$0") [--ref <branch|tag>] [--force] [--editable] [--check]
+EOF
+    exit 0
+    ;;
+  *)
+    echo "Unknown option: $1" >&2
+    exit 2
+    ;;
+  esac
+done
 
-BRANCH="${BRANCH:-main}"
+has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
-DEFAULT_SYNC_PATH="$HOME/Nextcloud/data/brave-sync"
-DESKTOP_DIR="$HOME/.local/share/applications"
+# ---------- OS detect & hints ----------
+OS_FAMILY="other"
+PKG_HINT() { :; }
 
-echo "📦 Installing Brave Sync..."
-
-# Clone or update repo
-if [ -d "$INSTALL_DIR/.git" ]; then
-  echo "🔄 Updating existing installation..."
-  git -C "$INSTALL_DIR" pull --quiet
-else
-  echo "⬇️ Cloning repository ..."
-  git clone --quiet --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
-fi
-
-# Ask user for sync destination
-mkdir -p "$CONFIG_DIR"
-
-if [ -f "$CONFIG_FILE" ]; then
-  echo "📂 Existing sync directory found in config:"
-  grep SYNC_DIR "$CONFIG_FILE"
-else
-  read -rp "📂 Enter the full path to your Brave sync folder [$DEFAULT_SYNC_PATH]: " SYNC_PATH
-  SYNC_PATH="${SYNC_PATH:-$DEFAULT_SYNC_PATH}"
-  EXPANDED_PATH=$(eval echo "$SYNC_PATH")
-
-  if [[ -z "$EXPANDED_PATH" ]]; then
-    echo "❌ Path cannot be empty. Install aborted."
-    exit 1
-  elif [[ "$EXPANDED_PATH" != /* ]]; then
-    echo "❌ Path must be absolute (start with '/'). Install aborted."
-    exit 1
-  elif [ ! -d "$EXPANDED_PATH" ]; then
-    echo "❌ Directory does not exist: $EXPANDED_PATH. Install aborted."
-    exit 1
+detect_os() {
+  case "$(uname -s)" in
+  Linux) OS_FAMILY="linux" ;;
+  Darwin) OS_FAMILY="mac" ;;
+  *) OS_FAMILY="other" ;;
+  esac
+  if [[ "$OS_FAMILY" == "linux" ]]; then
+    if has_cmd apt; then
+      PKG_HINT() { case "$1" in
+        rsync) echo "sudo apt update && sudo apt install -y rsync" ;;
+        procps) echo "sudo apt update && sudo apt install -y procps" ;;
+        uv) echo "curl -LsSf https://astral.sh/uv/install.sh | sh" ;;
+        pipx) echo "sudo apt install -y pipx && pipx ensurepath" ;;
+        esac }
+    elif has_cmd dnf; then
+      PKG_HINT() { case "$1" in
+        rsync) echo "sudo dnf install -y rsync" ;;
+        procps) echo "sudo dnf install -y procps-ng" ;;
+        uv) echo "curl -LsSf https://astral.sh/uv/install.sh | sh" ;;
+        pipx) echo "python3 -m pip install --user pipx && pipx ensurepath" ;;
+        esac }
+    elif has_cmd pacman; then
+      PKG_HINT() { case "$1" in
+        rsync) echo "sudo pacman -S --needed rsync" ;;
+        procps) echo "sudo pacman -S --needed procps-ng" ;;
+        uv) echo "curl -LsSf https://astral.sh/uv/install.sh | sh" ;;
+        pipx) echo "python3 -m pip install --user pipx && pipx ensurepath" ;;
+        esac }
+    else
+      PKG_HINT() { case "$1" in
+        rsync) echo "Install rsync with your package manager" ;;
+        procps) echo "Install procps/procps-ng with your package manager" ;;
+        uv) echo "Install uv: https://docs.astral.sh/uv/" ;;
+        pipx) echo "Install pipx: https://pypa.github.io/pipx/" ;;
+        esac }
+    fi
+  elif [[ "$OS_FAMILY" == "mac" ]]; then
+    PKG_HINT() { case "$1" in
+      rsync) echo "brew install rsync" ;;
+      uv) echo "curl -LsSf https://astral.sh/uv/install.sh | sh" ;;
+      pipx) echo "python3 -m pip install --user pipx && pipx ensurepath" ;;
+      procps) echo "(not required on macOS)" ;;
+      esac }
   else
-    echo "SYNC_DIR=\"$EXPANDED_PATH\"" >"$CONFIG_FILE"
-    echo "✅ Sync directory saved to $CONFIG_FILE"
+    PKG_HINT() { case "$1" in
+      rsync) echo "Install rsync for your OS" ;;
+      uv) echo "Install uv: https://docs.astral.sh/uv/" ;;
+      pipx) echo "Install pipx: https://pypa.github.io/pipx/" ;;
+      procps) echo "Install procps for your OS" ;;
+      esac }
   fi
+}
+
+require() {
+  # $1=cmd $2=label $3=hint-key
+  if ! has_cmd "$1"; then
+    echo "❌ Missing dependency: $2 ('$1')"
+    local hint
+    hint="$(PKG_HINT "$3")"
+    [[ -n "$hint" ]] && echo "   → $hint"
+    return 1
+  fi
+  return 0
+}
+
+require_python39_if_pipx() {
+  if has_cmd uv; then return 0; fi
+  if ! has_cmd python3; then
+    echo "❌ Missing dependency: Python 3.9+ ('python3')"
+    return 1
+  fi
+  python3 - <<'PY' >/dev/null || {
+import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)
+PY
+    echo "❌ Python >= 3.9 is required"
+    return 1
+  }
+}
+
+preflight() {
+  detect_os
+  local ok=1
+  require rsync "rsync" rsync || ok=0
+  if [[ "$OS_FAMILY" == "linux" ]]; then
+    (has_cmd pgrep && has_cmd pkill) || {
+      echo "❌ Missing: pgrep/pkill (procps)"
+      echo "   → $(PKG_HINT procps)"
+      ok=0
+    }
+  fi
+  if has_cmd uv; then :; else
+    require pipx "pipx" pipx || ok=0
+    require_python39_if_pipx || ok=0
+  fi
+  if [[ "$ok" -ne 1 ]]; then
+    echo
+    echo "Fix the missing dependencies above and re-run."
+    exit 127
+  fi
+  echo "✅ Dependencies OK."
+}
+
+ensure_path_hint() {
+  case ":$PATH:" in
+  *":$HOME/.local/bin:"*) : ;;
+  *)
+    echo "ℹ️  Add ~/.local/bin to PATH if 'brave-sync' is not found:"
+    echo "    echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc && source ~/.bashrc"
+    ;;
+  esac
+}
+
+install_local() {
+  # Running inside a repo (pyproject.toml present)
+  if [[ "$EDITABLE" -eq 1 ]]; then
+    if ! has_cmd uv; then
+      echo "❌ Editable mode requires 'uv'"
+      echo "   → $(PKG_HINT uv)"
+      exit 127
+    fi
+    echo "→ Creating .venv and installing in editable mode…"
+    uv venv
+    # shellcheck disable=SC1091
+    source .venv/bin/activate
+    uv pip install -e .
+    echo "✅ Editable install done. Activate with: source .venv/bin/activate"
+  else
+    if has_cmd uv; then
+      echo "→ Installing as user tool via uv (from local repo)…"
+      uv tool install ${FORCE_FLAG} --from . brave-sync
+    else
+      echo "→ 'uv' not found; installing via pipx (from local repo)…"
+      pipx install .
+    fi
+  fi
+}
+
+install_remote() {
+  # No repo around → install from GitHub
+  if has_cmd uv; then
+    echo "→ Installing via uv tool from git (ref: $REF)…"
+    uv tool install ${FORCE_FLAG} --from "git+https://github.com/${REPO}@${REF}" brave-sync
+  else
+    echo "→ Installing via pipx from git (ref: $REF)…"
+    pipx install "git+https://github.com/${REPO}@${REF}"
+  fi
+}
+
+postcheck() {
+  echo "— Verifying installation —"
+  if command -v brave-sync >/dev/null 2>&1; then
+    brave-sync version || true
+    echo "✅ Installed. Try: brave-sync --help"
+  else
+    echo "⚠️  'brave-sync' is not on PATH yet."
+    ensure_path_hint
+  fi
+}
+
+# ---------------- main ----------------
+preflight
+[[ "$CHECK_ONLY" -eq 1 ]] && exit 0
+
+if [[ -f "pyproject.toml" ]]; then
+  install_local
+else
+  install_remote
 fi
 
-# Create launcher scripts
-echo '#!/bin/bash
-bash "$HOME/.local/share/brave-sync/scripts/sync.sh" backup' >"$BIN_DIR/brave-backup"
-
-echo '#!/bin/bash
-bash "$HOME/.local/share/brave-sync/scripts/sync.sh" restore' >"$BIN_DIR/brave-restore"
-
-chmod +x "$BIN_DIR/brave-backup" "$BIN_DIR/brave-restore"
-
-# Install icons
-mkdir -p "$ICON_TARGET_DIR"
-cp "$ICON_SOURCE" "$ICON_TARGET"
-
-# Update icon cache if available
-if command -v gtk-update-icon-cache >/dev/null 2>&1; then
-  gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" >/dev/null 2>&1
-fi
-
-# Install .desktop launchers
-mkdir -p "$DESKTOP_DIR"
-cp "$INSTALL_DIR/desktop/"*.desktop "$DESKTOP_DIR/"
-
-# Install main CLI command
-cp "$INSTALL_DIR/cli/brave_sync.sh" "$BIN_DIR/brave-sync"
-chmod +x "$BIN_DIR/brave-sync"
-
-# Save version info
-cp "$INSTALL_DIR/version" "$INSTALL_DIR/.version"
-
-echo "📦 Installed Brave Sync version $(cat "$INSTALL_DIR/.version")"
-echo "➡️  Run 'brave-sync help' to see available commands"
+postcheck

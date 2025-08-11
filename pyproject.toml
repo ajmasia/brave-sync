@@ -1,0 +1,16 @@
+[project]
+name = "brave-sync"
+version = "1.2.0"
+description = "Local backup/restore helper for Brave Browser data"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["platformdirs>=4.3.8", "typer>=0.16.0"]
+
+authors = [{ name = "Antonio Masiá", email = "ajmasia.dev@ysnp.link" }]
+
+[project.scripts]
+brave-sync = "brave_sync.cli:app"
+
+[build-system]
+requires = ["setuptools>=80.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
