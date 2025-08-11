@@ -1,20 +1,10 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import List
 import subprocess
 import typer
 
 from .config import ensure_config
 from ..core.io import _ensure_rsync
-
-# Same items used in backup/restore (files + directories)
-DEFAULT_ITEMS: List[str] = [
-    "Bookmarks",
-    "Preferences",
-    "History",
-    "Extensions",
-    "Sync Data",
-]
 
 
 def _rsync_preview(src: Path, dst_dir: Path) -> list[str]:
@@ -75,6 +65,14 @@ def register(app: typer.Typer) -> None:
             raise typer.Exit(1)
         sync_dir.mkdir(parents=True, exist_ok=True)
 
+        items = list(cfg.items or [])
+        if not items:
+            typer.secho(
+                "No items configured. Set them with: brave-sync config-items set 'Bookmarks,Preferences,...'",
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(2)
+
         total_up = 0  # profile -> sync (what backup would copy/remove)
         total_down = 0  # sync -> profile (what restore would copy/remove)
 
@@ -82,7 +80,7 @@ def register(app: typer.Typer) -> None:
             f"Verifying differences between:\n  PROFILE: {profile_dir}\n  SYNC   : {sync_dir}\n"
         )
 
-        for base in DEFAULT_ITEMS:
+        for base in items:
             src_profile_item = profile_dir / base
             src_sync_item = sync_dir / base
 
