@@ -1,0 +1,53 @@
+# cliff.toml — configuration for git-cliff
+[git]
+# consider all commits; filtering happens via commit_parser below
+conventional_commits = true
+filter_unconventional = false
+tag_pattern = "v[0-9]*"
+
+commit_parsers = [
+  { message = "^feat", group = "✨ Features" },
+  { message = "^fix", group = "🐛 Fixes" },
+  { message = "^perf", group = "⚡ Performance" },
+  { message = "^refactor", group = "♻️ Refactors" },
+  { message = "^docs", group = "📝 Docs" },
+  { message = "^test", group = "✅ Tests" },
+  { message = "^build|^ci", group = "🛠 Build & CI" },
+  { message = "^chore", group = "🧹 Chore" },
+  # breaking changes note
+  { body = "BREAKING CHANGE", group = "💥 Breaking Changes" },
+]
+
+# remove noise like merges/reverts, but keep revert if it has conventional header
+exclude_commits = ["^Merge.*"]
+
+[remote]
+# used for links to commits & issues
+github = true
+# repo is auto-detected from git, override if needed:
+# owner = "ajmasia"
+# repo  = "brave-sync"
+
+[changelog]
+# header is stripped via --strip header in the action
+footer = """
+
+"""
+trim = true
+
+# Template for each release section
+# Available vars: version, previous, date, commits (array), repository, ...
+body = """
+## {{ version }} ({{ date | date(format="%Y-%m-%d") }})
+
+{% if commits | length == 0 %}
+No changes.
+{% else %}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first }} ({{ commit.hash | truncate(length=7, end="" ) }}){% if commit.breaking %} **BREAKING**{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+"""

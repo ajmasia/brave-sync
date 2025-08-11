@@ -1,0 +1,52 @@
+name: Release on tag
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # tags tipo v1.2.3
+  workflow_dispatch: {} # opcional: lanzarlo a mano
+
+permissions:
+  contents: write # necesario para crear la release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history with tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set VERSION from tag
+        id: vars
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      # Genera notas de release desde commits usando git-cliff (conv. commits)
+      - name: Generate release notes (git-cliff)
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: ./cliff.toml
+          # Genera únicamente la última sección (para el tag actual)
+          args: --tag "${{ steps.vars.outputs.version }}" --latest --strip header
+        env:
+          OUTPUT: CHANGELOG-RELEASE.md
+
+      - name: Show generated notes (debug)
+        run: |
+          echo "----- BEGIN NOTES -----"
+          cat CHANGELOG-RELEASE.md
+          echo "----- END NOTES -----"
+
+      # Crea la release usando el body generado
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.version }}
+          name: brave-sync ${{ steps.vars.outputs.version }}
+          body_path: CHANGELOG-RELEASE.md
+          draft: false
+          prerelease: ${{ contains(steps.vars.outputs.version, '-') }} # v1.2.3-rc.1 => prerelease
+
