@@ -7,7 +7,6 @@ import time
 import typer
 
 
-# ---------- Brave process handling (seguro) ----------
 def _pgrep_exact(names: list[str]) -> bool:
     for n in names:
         r = subprocess.run(
@@ -76,7 +75,6 @@ def ensure_brave_closed(timeout_s: float = 8.0) -> None:
         return
 
 
-# ---------- rsync wrappers ----------
 def _ensure_rsync() -> None:
     if shutil.which("rsync") is None:
         typer.secho(
@@ -124,3 +122,72 @@ def rsync_copy(
     completed = subprocess.run(["rsync", *args[1:], "--", src_spec, dst_spec])
     if completed.returncode not in (0, 23):
         raise typer.Exit(completed.returncode)
+
+
+def is_brave_running() -> bool:
+    """Best-effort check if Brave is currently running."""
+    if sys.platform.startswith("linux"):
+        return _pgrep_exact(["brave", "brave-browser"])
+    if sys.platform == "darwin":
+        return _pgrep_exact(["Brave Browser"])
+    if sys.platform.startswith("win"):
+        try:
+            out = subprocess.run(
+                ["tasklist", "/FI", "IMAGENAME eq brave.exe"],
+                capture_output=True,
+                text=True,
+                check=False,
+            ).stdout.lower()
+            return "brave.exe" in out
+        except Exception:
+            return False
+    return False
+
+
+def launch_brave() -> bool:
+    """Try to (re)launch Brave on the current OS. Returns True on success."""
+    try:
+        if sys.platform.startswith("linux"):
+            candidates = [
+                ["brave"],
+                ["brave-browser"],
+                ["flatpak", "run", "com.brave.Browser"],
+                ["snap", "run", "brave"],
+            ]
+            for cmd in candidates:
+                if shutil.which(cmd[0]):
+                    subprocess.Popen(
+                        cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    )
+                    return True
+            return False
+
+        if sys.platform == "darwin":
+            subprocess.Popen(
+                ["open", "-a", "Brave Browser"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return True
+
+        if sys.platform.startswith("win"):
+            # 'start' is a shell built-in, so use shell=True
+            subprocess.Popen('start "" brave.exe', shell=True)
+            return True
+    except Exception:
+        return False
+    return False
+
+
+def maybe_reopen_brave(reopen: bool, dry_run: bool) -> None:
+    """
+    Reopen Brave if requested, not in dry-run, and it's not already running.
+    """
+    if not reopen or dry_run:
+        return
+    # Give the OS a beat after closing to release locks
+    time.sleep(0.5)
+    if is_brave_running():
+        return
+    if not launch_brave():
+        typer.echo("Warning: could not relaunch Brave (binary not found on PATH?).")
