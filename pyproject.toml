@@ -1,6 +1,6 @@
 [project]
 name = "brave-sync"
-version = "1.2.3"
+version = "1.2.4"
 description = "Local backup/restore helper for Brave Browser data"
 readme = "README.md"
 requires-python = ">=3.12"
