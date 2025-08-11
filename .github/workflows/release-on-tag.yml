@@ -3,11 +3,11 @@ name: Release on tag
 on:
   push:
     tags:
-      - "v*.*.*" # tags tipo v1.2.3
-  workflow_dispatch: {} # opcional: lanzarlo a mano
+      - "v*.*.*"
+  workflow_dispatch: {}
 
 permissions:
-  contents: write # necesario para crear la release
+  contents: write
 
 jobs:
   release:
@@ -24,12 +24,10 @@ jobs:
           VERSION="${GITHUB_REF_NAME}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      # Genera notas de release desde commits usando git-cliff (conv. commits)
       - name: Generate release notes (git-cliff)
-        uses: orhun/git-cliff-action@v3
+        uses: orhun/git-cliff-action@v4
         with:
           config: ./cliff.toml
-          # Genera únicamente la última sección (para el tag actual)
           args: --tag "${{ steps.vars.outputs.version }}" --latest --strip header
         env:
           OUTPUT: CHANGELOG-RELEASE.md
@@ -40,7 +38,6 @@ jobs:
           cat CHANGELOG-RELEASE.md
           echo "----- END NOTES -----"
 
-      # Crea la release usando el body generado
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
