@@ -1,10 +1,10 @@
 import typer
 
+from .commands.version import register as register_version
 
-print("Brave Sync CLI is starting...")
 app = typer.Typer(help="Brave Sync CLI")
 
 
-@app.command()
-def hello(name: str):
-    print(f"Hello {name}")
+# Register commands
+for reg in (register_version,):
+    reg(app)
