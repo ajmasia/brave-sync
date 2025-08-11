@@ -1,20 +1,17 @@
 from __future__ import annotations
-
 import shutil
 import subprocess
 from pathlib import Path
-import typer
 import sys
 import time
+import typer
 
 
+# ---------- Brave process handling (seguro) ----------
 def _pgrep_exact(names: list[str]) -> bool:
-    """Return True if any process with an exact name in `names` is running."""
     for n in names:
         r = subprocess.run(
-            ["pgrep", "-x", n],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            ["pgrep", "-x", n], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         if r.returncode == 0:
             return True
@@ -22,7 +19,6 @@ def _pgrep_exact(names: list[str]) -> bool:
 
 
 def _wait_until_gone(names: list[str], timeout_s: float) -> bool:
-    """Wait until none of the exact-named processes are running."""
     deadline = time.time() + timeout_s
     while time.time() < deadline:
         if not _pgrep_exact(names):
@@ -32,16 +28,9 @@ def _wait_until_gone(names: list[str], timeout_s: float) -> bool:
 
 
 def ensure_brave_closed(timeout_s: float = 8.0) -> None:
-    """
-    Try to close Brave gently on Linux/macOS/Windows (best-effort).
-    - Linux: pkill exact names ('-x') to avoid killing 'brave-sync'.
-    - macOS: ask the app to quit via AppleScript, then fall back to pkill exact names.
-    - Windows: taskkill on brave.exe.
-    Escalate to KILL if still alive after timeout.
-    """
+    """Close Brave gently per-OS without matar 'brave-sync' por error."""
     if sys.platform.startswith("linux"):
         names = ["brave", "brave-browser"]
-        # TERM exact matches (not -f!)
         for n in names:
             subprocess.run(
                 ["pkill", "-TERM", "-x", n],
@@ -50,7 +39,6 @@ def ensure_brave_closed(timeout_s: float = 8.0) -> None:
                 stderr=subprocess.DEVNULL,
             )
         if not _wait_until_gone(names, timeout_s):
-            # Escalate
             for n in names:
                 subprocess.run(
                     ["pkill", "-KILL", "-x", n],
@@ -60,15 +48,13 @@ def ensure_brave_closed(timeout_s: float = 8.0) -> None:
                 )
         return
 
-    if sys.platform.startswith("darwin"):
-        # Ask the app politely
+    if sys.platform == "darwin":
         subprocess.run(
             ["osascript", "-e", 'tell application "Brave Browser" to quit'],
             check=False,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        # Some helpers might linger; try exact pkill on the binary name used on macOS
         names = ["Brave Browser"]
         if not _wait_until_gone(names, timeout_s):
             for n in names:
@@ -81,70 +67,60 @@ def ensure_brave_closed(timeout_s: float = 8.0) -> None:
         return
 
     if sys.platform.startswith("win"):
-        # /T kills child processes too; /F forces if needed
         subprocess.run(
             ["taskkill", "/IM", "brave.exe", "/T", "/F"],
             check=False,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        # No reliable wait without WMI; assume taskkill did its job.
         return
 
-    # Fallback (unknown OS): do nothing
-    return
 
-
-def ensure_rsync_available() -> None:
-    """
-    Ensure 'rsync' binary is on PATH; raise a friendly error if not.
-    """
+# ---------- rsync wrappers ----------
+def _ensure_rsync() -> None:
     if shutil.which("rsync") is None:
         typer.secho(
-            "ERROR: 'rsync' is not installed or not on PATH.\n"
-            "Install it and try again (e.g. 'sudo apt install rsync' or 'brew install rsync').",
+            "ERROR: 'rsync' not found. Install it (apt/brew) and retry.",
             fg=typer.colors.RED,
         )
-        raise typer.Exit(code=127)
+        raise typer.Exit(127)
 
 
 def rsync_copy(
-    src: Path, dst: Path, dry_run: bool = False, delete: bool = False
+    src: Path, dst: Path, *, dry_run: bool = False, delete: bool = False
 ) -> None:
     """
-    Copy 'src' to 'dst' using rsync.
+    Copy 'src' into 'dst' using rsync.
 
-    - If 'src' is a directory, we copy its *contents* (trailing slash) into 'dst' and
-      optionally mirror deletions with --delete.
-    - If 'src' is a file, we copy the file to 'dst' (which can be a file path or a directory).
+    Your usage passes:
+      - FILES:  rsync_copy(<profile>/<file>, <sync>/<file>)
+      - DIRS:   rsync_copy(<profile>/Extensions, <sync>/Extensions)
 
-    'dst' parent directories will be created if needed.
+    Semantics we implement:
+      - FILE  -> FILE:   rsync SRC  DST
+      - DIR   -> DIR:    ensure DST exists, rsync SRC/  DST/   (copy contents)
+      - '--delete' only applies for directories (safe default: False)
     """
-    ensure_rsync_available()
-
-    # Ensure destination parent exists
-    dst.parent.mkdir(parents=True, exist_ok=True)
+    _ensure_rsync()
 
     args = ["rsync", "-a", "--human-readable"]
-
     if dry_run:
-        # -n prints what would happen; -v gives visibility
-        args += ["-n", "-v"]
+        args += ["-n", "-v", "--stats"]
+    if delete and src.is_dir():
+        args.append("--delete")
 
     if src.is_dir():
-        # Copy directory contents: add trailing '/' in src and dst
-        src_spec = str(src) + "/"
-        dst_spec = str(dst) + "/"
-        if delete:
-            args.append("--delete")
+        # Make sure destination directory exists, then copy *contents* of src into it
+        dst.mkdir(parents=True, exist_ok=True)
+        src_spec = str(src) + "/"  # copy contents
+        dst_spec = str(dst) + "/"  # treat as directory
     else:
-        # Copy a single file
+        # File-to-file copy; ensure parent exists
+        dst.parent.mkdir(parents=True, exist_ok=True)
         src_spec = str(src)
         dst_spec = str(dst)
 
-    # Run rsync
-    copy_cmd = args + ["--", src_spec, dst_spec]
-    completed = subprocess.run(copy_cmd)
-
-    if completed.returncode != 0:
-        raise typer.Exit(code=completed.returncode)
+    # Run rsync (treat code 23 as non-fatal if something vanishes; usually OK after closing Brave)
+    completed = subprocess.run(["rsync", *args[1:], "--", src_spec, dst_spec])
+    if completed.returncode not in (0, 23):
+        raise typer.Exit(completed.returncode)

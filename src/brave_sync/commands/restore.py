@@ -16,7 +16,11 @@ DEFAULT_ITEMS: List[str] = [
 
 
 def register(app: typer.Typer) -> None:
-    @app.command("restore")
+    @app.command(
+        "restore",
+        help="Restore items from the sync directory back into the Brave profile using rsync.",
+        context_settings={"help_option_names": ["-h", "--help"]},
+    )
     def restore_cmd(
         dry_run: bool = typer.Option(
             False, "--dry-run", "-n", help="Print actions without modifying files"

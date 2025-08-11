@@ -5,7 +5,7 @@ import subprocess
 import typer
 
 from .config import ensure_config
-from ..core.io import ensure_rsync_available
+from ..core.io import _ensure_rsync
 
 # Same items used in backup/restore (files + directories)
 DEFAULT_ITEMS: List[str] = [
@@ -22,7 +22,7 @@ def _rsync_preview(src: Path, dst_dir: Path) -> list[str]:
     Run rsync in dry-run mode from 'src' into 'dst_dir' (destination is a directory).
     Returns a parsed list of itemized-change lines (what would change).
     """
-    ensure_rsync_available()
+    _ensure_rsync()
     dst_dir.mkdir(parents=True, exist_ok=True)
 
     # We mimic `rsync -a "$SRC" "$DST_DIR/"` and add:
@@ -56,7 +56,11 @@ def _rsync_preview(src: Path, dst_dir: Path) -> list[str]:
 
 
 def register(app: typer.Typer) -> None:
-    @app.command("verify")
+    @app.command(
+        "verify",
+        help="Preview differences both ways (what backup/restore would change) without touching files.",
+        context_settings={"help_option_names": ["-h", "--help"]},
+    )
     def verify_cmd() -> None:
         """
         Show what would change if you run 'backup' and 'restore' (both directions),
