@@ -12,3 +12,5 @@ INSTALL_DIR="$HOME/.local/share/brave-sync"
 # Version info
 VERSION_FILE_LOCAL="$ROOT_DIR/.version"
 REPO_VERSION_FILE="$ROOT_DIR/version"
+
+declare -a DATA_TO_SYNC=(Bookmarks Extensions "Web Data" Preferences History "Sync Data")

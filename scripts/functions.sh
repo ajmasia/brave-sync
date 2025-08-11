@@ -7,7 +7,7 @@ run_backup() {
     BRAVE_WAS_CLOSED=0
   fi
 
-  for ITEM in Bookmarks Extensions "Web Data" Preferences History; do
+  for ITEM in Bookmarks Extensions "Web Data" Preferences History "Sync Data"; do
     if [ -e "$BRAVE_DIR/$ITEM" ]; then
       rsync -av --delete "$BRAVE_DIR/$ITEM" "$CLOUD_DIR/"
       echo "✅ Backed up: $ITEM"
@@ -30,7 +30,7 @@ run_restore() {
     BRAVE_WAS_CLOSED=0
   fi
 
-  for ITEM in Bookmarks Extensions "Web Data" Preferences History; do
+  for ITEM in Bookmarks Extensions "Web Data" Preferences History "Sync Data"; do
     if [ -e "$CLOUD_DIR/$ITEM" ]; then
       rsync -av --delete "$CLOUD_DIR/$ITEM" "$BRAVE_DIR/"
       echo "✅ Restored: $ITEM"
