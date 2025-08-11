@@ -124,17 +124,19 @@ require() {
 }
 
 require_python39_if_pipx() {
+  # If uv is present we don't need python3 for pipx path
   if has_cmd uv; then return 0; fi
+
   if ! has_cmd python3; then
-    echo "❌ Missing dependency: Python 3.9+ ('python3')"
+    echo "❌ Missing dependency: Python 3.9+ ('python3')" >&2
     return 1
   fi
-  python3 - <<'PY' >/dev/null || {
-import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)
-PY
-    echo "❌ Python >= 3.9 is required"
+
+  # Exit code 0 if >= 3.9, 1 otherwise
+  if ! python3 -c 'import sys; raise SystemExit(0 if sys.version_info[:2] >= (3, 9) else 1)'; then
+    echo "❌ Python >= 3.9 is required" >&2
     return 1
-  }
+  fi
 }
 
 preflight() {
