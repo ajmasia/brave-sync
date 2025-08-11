@@ -1,0 +1,83 @@
+# -----------------------
+# Python basics
+# -----------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.so
+
+# -----------------------
+# Build / packaging
+# -----------------------
+.build/
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
+pip-wheel-metadata/
+share/python-wheels/
+downloads/
+
+# -----------------------
+# Virtual environments (uv/pip/venv)
+# -----------------------
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# -----------------------
+# Test / coverage
+# -----------------------
+.pytest_cache/
+.tox/
+.nox/
+coverage.xml
+htmlcov/
+.coverage
+.coverage.*
+.cache/
+
+# -----------------------
+# Type checking / linters
+# -----------------------
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# -----------------------
+# Logs & dotenv
+# -----------------------
+*.log
+logs/
+.env
+.env.*
+*.local
+
+# -----------------------
+# Editors / OS
+# -----------------------
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# -----------------------
+# Project-specific: sandbox data
+# Keep structure with .gitkeep files
+# -----------------------
+sandbox/**
+!sandbox/.gitkeep
+!sandbox/**/.gitkeep
+
