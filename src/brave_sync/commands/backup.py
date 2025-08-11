@@ -11,7 +11,7 @@ DEFAULT_ITEMS: List[str] = [
     "Preferences",
     "History",
     "Extensions",
-    "Login Data",
+    "Sync Data",
 ]
 
 
